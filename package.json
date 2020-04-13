@@ -1,6 +1,6 @@
 {
   "name": "mage-engine.particles",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Easy-to-use Particle Systems for THREE.js.",
   "main": "dist/index.js",
   "scripts": {
