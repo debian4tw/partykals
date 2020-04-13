@@ -17,6 +17,8 @@ import {
     Vector3
 } from 'three';
 
+const defined = (val) => { return (val !== undefined) && (val !== null); }
+
 /**
  * Particles system.
  */
@@ -97,9 +99,6 @@ export default class ParticlesSystem {
         options.system = options.system || {};
         this.options = options;
 
-        // to check if value is defined
-        var defined = (val) => { return (val !== undefined) && (val !== null); }
-
         // get particle options
         var poptions = options.particles;
 
@@ -136,62 +135,74 @@ export default class ParticlesSystem {
         if (defined(poptions.startSize) && defined(poptions.size)) { throw new Error("When providing 'size' you can't also provide 'startSize'!"); }
 
         // get particles count
-        var particleCount = options.system.particlesCount || 10;
+        this.particleCount = options.system.particlesCount || 10;
 
         // get blending mode
-        var blending = options.particles.blending || "opaque";
+        this.blending = options.particles.blending || "opaque";
 
         // get threejs blending mode
-        var threeBlend = {
+        this.threeBlend = {
             "opaque": NoBlending,
             "additive": AdditiveBlending,
             "multiply": MultiplyBlending,
             "blend": NormalBlending,
         }[blending];
 
+        // starting if options.autostart = true;
+        if (options.autostart) {
+            this.start();
+        }
+    }
+
+    /*
+    * starting the system
+    */
+    start() {
         // set emitters
         this._emitters = [];
-        if (options.system.emitters) {
-            if (options.system.emitters instanceof Array) {
-                for (var i = 0; i < options.system.emitters.length; ++i) {
-                    this.addEmitter(options.system.emitters[i]);
+        const { system, particles, container } = this.options;
+
+        if (system.emitters) {
+            if (system.emitters instanceof Array) {
+                for (var i = 0; i < system.emitters.length; ++i) {
+                    this.addEmitter(system.emitters[i]);
                 }
             }
             else {
-                this.addEmitter(options.system.emitters);
+                this.addEmitter(system.emitters);
             }
         }
 
         // has transparency?
-        var isTransparent = (blending !== "opaque");
+        var isTransparent = (this.blending !== "opaque");
 
         // create the particle geometry
         this.particlesGeometry = new BufferGeometry();
 
         // set perspective mode
-        var perspective = options.system.perspective !== undefined ? Boolean(options.system.perspective) : true;
+        var perspective = system.perspective !== undefined ? Boolean(system.perspective) : true;
 
         // create particles material
         var pMaterial = new ParticlesMaterial({
-            size: options.particles.size || 10,
-            color: options.particles.globalColor || 0xffffff,
-            blending: threeBlend,
+            size: particles.size || 10,
+            color: particles.globalColor || 0xffffff,
+            blending: this.threeBlend,
             perspective: perspective,
             transparent: isTransparent,
-            map: options.particles.texture,
-            perParticleColor: Boolean(options.particles.colorize),
-            alphaTest: (blending === "blend") && defined(options.particles.texture),
-            constSize: defined(options.particles.globalSize) ? options.particles.globalSize : null,
-            depthWrite: defined(options.system.depthWrite) ? options.system.depthWrite : true,
-            depthTest: defined(options.system.depthTest) ? options.system.depthTest : true,
-            perParticleRotation: options.particles.rotating,
+            map: particles.texture,
+            perParticleColor: Boolean(particles.colorize),
+            alphaTest: (this.blending === "blend") && defined(particles.texture),
+            constSize: defined(particles.globalSize) ? particles.globalSize : null,
+            depthWrite: defined(system.depthWrite) ? system.depthWrite : true,
+            depthTest: defined(system.depthTest) ? system.depthTest : true,
+            perParticleRotation: particles.rotating,
         });
 
         // store material for later usage
         this.material = pMaterial;
 
         // store speed factor
-        this.speed = options.system.speed || 1;
+        this.speed = system.speed || 1;
 
         // set system starting ttl and other params
         this.reset();
@@ -201,12 +212,12 @@ export default class ParticlesSystem {
         this._deadParticles = [];
 
         // create all particles + set geometry attributes
-        var vertices = new Float32Array(particleCount * 3);
-        var colors = options.particles.colorize ? new Float32Array(particleCount * 3) : null;
-        var alphas = options.particles.fade ? new Float32Array( particleCount * 1 ) : null;
-        var sizes = options.particles.scaling ? new Float32Array( particleCount * 1 ) : null;
-        var rotations = options.particles.rotating ? new Float32Array( particleCount * 1 ) : null;
-        for (var p = 0; p < particleCount; p++)
+        var vertices = new Float32Array(this.particleCount * 3);
+        var colors = particles.colorize ? new Float32Array(this.particleCount * 3) : null;
+        var alphas = particles.fade ? new Float32Array( this.particleCount * 1 ) : null;
+        var sizes = particles.scaling ? new Float32Array( this.particleCount * 1 ) : null;
+        var rotations = particles.rotating ? new Float32Array( this.particleCount * 1 ) : null;
+        for (var p = 0; p < this.particleCount; p++)
         {
             var index = p * 3;
             vertices[index] = vertices[index + 1] = vertices[index + 2] = 0;
@@ -224,7 +235,7 @@ export default class ParticlesSystem {
         this.particlesGeometry.setDrawRange(0, 0);
 
         // set scale
-        this.material.setBaseScale(options.system.scale || 400);
+        this.material.setBaseScale(system.scale || 400);
 
         // create the particles system
         var particleSystem = new Points(this.particlesGeometry, this.material.material);
@@ -240,9 +251,16 @@ export default class ParticlesSystem {
         this._rotateDirty = Boolean(rotations);
 
         // add it to the parent container
-        if (options.container) {
-            this.addTo(options.container);
+        if (container) {
+            this.addTo(container);
         }
+    }
+
+    /*
+    * Sets ttl to zero
+    */
+    stop() {
+        this.ttl = 0;
     }
 
     /**
