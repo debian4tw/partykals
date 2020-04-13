@@ -98,6 +98,7 @@ export default class ParticlesSystem {
         options.particles = options.particles || {worldPosition: true};
         options.system = options.system || {};
         this.options = options;
+        this.hasStarted = false;
 
         // get particle options
         var poptions = options.particles;
@@ -254,6 +255,8 @@ export default class ParticlesSystem {
         if (container) {
             this.addTo(container);
         }
+
+        this.hasStarted = true;
     }
 
     /*
@@ -414,6 +417,9 @@ export default class ParticlesSystem {
      */
     update(deltaTime)
     {
+        if (!this.hasStarted) {
+            return;
+        }
         // if deltaTime is undefined, set automatically
         if (deltaTime === undefined) {
             var timeNow = (new Date()).getTime() / 1000.0;
