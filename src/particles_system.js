@@ -147,7 +147,7 @@ export default class ParticlesSystem {
             "additive": AdditiveBlending,
             "multiply": MultiplyBlending,
             "blend": NormalBlending,
-        }[blending];
+        }[this.blending];
 
         // starting if options.autostart = true;
         if (options.autostart) {
