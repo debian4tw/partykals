@@ -1036,6 +1036,7 @@ function () {
 
 
       if (this.finished) {
+        this.removeAndDisposeIfFinished();
         return;
       } // call optional update
 

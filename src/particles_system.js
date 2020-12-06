@@ -520,6 +520,7 @@ export default class ParticlesSystem {
 
         // if finished, stop here
         if (this.finished) {
+            this.removeAndDisposeIfFinished()
             return;
         }
 
