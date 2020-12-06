@@ -1,4 +1,6 @@
-import {Color,Vector3,ShaderMaterial,VertexColors,NoBlending,AdditiveBlending,MultiplyBlending,NormalBlending,BufferGeometry,BufferAttribute,Points}from'three';function _classCallCheck(instance, Constructor) {
+import { Color, Vector3, ShaderMaterial, VertexColors, NoBlending, AdditiveBlending, MultiplyBlending, NormalBlending, BufferGeometry, BufferAttribute, Points } from 'three';
+
+function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
@@ -65,7 +67,9 @@ function _possibleConstructorReturn(self, call) {
   }
 
   return _assertThisInitialized(self);
-}/**
+}
+
+/**
  * Implement a single particle in the particles system.
  * Author: Ronen Ness.
  * Since: 2019.
@@ -134,7 +138,20 @@ var lerp = function lerp(x, y, alpha) {
 
 var randomizerOrValue = function randomizerOrValue(val) {
   return (val.generate ? val.generate() : val) || 0;
-};var utils=/*#__PURE__*/Object.freeze({__proto__:null,getRandomBetween: getRandomBetween,getRandomWithSpread: getRandomWithSpread,getRandomColorBetween: getRandomColorBetween,getRandomVectorBetween: getRandomVectorBetween,lerpColors: lerpColors,lerp: lerp,randomizerOrValue: randomizerOrValue});/**
+};
+
+var utils = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  getRandomBetween: getRandomBetween,
+  getRandomWithSpread: getRandomWithSpread,
+  getRandomColorBetween: getRandomColorBetween,
+  getRandomVectorBetween: getRandomVectorBetween,
+  lerpColors: lerpColors,
+  lerp: lerp,
+  randomizerOrValue: randomizerOrValue
+});
+
+/**
  * A single particle metadata in the particles system.
  * We attach this to the particle's vertices when in system's geometry.
  */
@@ -386,18 +403,22 @@ function getConstOrRandomColor(constValOrRandomizer, returnNullIfUndefined) {
   }
 
   return constValOrRandomizer.clone();
-}/**
+}
+
+/**
  * Implement vertex shader for our particles.
  * Author: Ronen Ness.
  * Since: 2019.
  */
 var VertexShaderCode = "\n// attributes we get from geometry\nattribute float alpha;\n\n// per-particle size\n#ifdef CONST_SIZE\n    uniform float constSize;\n#else\n    attribute float size;\n#endif\n\n// per-particle rotation\n#ifdef ROTATION\n    attribute float rotation;\n#endif\n\n// system scale when using perspective mode\n#ifdef PERSPECTIVE\n    uniform float rendererScale;\n#endif\n\n// output params for fragment shader\nvarying float vAlpha;\n\n// set per-particle color\n#ifdef COLORING\n    varying vec3 vColor;\n#endif\n\n// get per-particle rotation\n#ifdef ROTATION\n    varying float vRotation;\n#endif\n\n// vertex shader main\nvoid main() \n{\n    // alpha and color\n    vAlpha = alpha;\n\n    // set color\n    #ifdef COLORING\n        vColor = color;\n    #endif\n\n    // set const size\n    #ifdef CONST_SIZE\n        float size = constSize;\n    #endif\n\n    // set position\n    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n    gl_Position = projectionMatrix * mvPosition;\n\n    // apply rotation\n    #ifdef ROTATION\n        vRotation = rotation;\n    #endif\n    \n    // set size - either perspective or constant\n    #ifdef PERSPECTIVE\n        gl_PointSize = size * (rendererScale / length(mvPosition.xyz));\n    #else\n        gl_PointSize = size;\n    #endif\n}\n";
+
 /**
  * Implement fragment shader for our particles.
  * Author: Ronen Ness.
  * Since: 2019.
  */
 var FragmentShaderCode = "\n// material uniforms\nuniform vec3 globalColor;\n\n// params we get from vertex shader\nvarying float vAlpha;\n\n// per-particle color from vertex shader\n#ifdef COLORING\n    varying vec3 vColor;\n#endif\n\n// per-particle rotation from vertex shader\n#ifdef ROTATION\n    varying float vRotation;\n#endif\n\n// diffuse texture\n#ifdef TEXTURE\n    uniform sampler2D texture;\n#endif\n\n// fragment shader main\nvoid main() \n{\n    // set default color if don't have per-particle colors\n    #ifndef COLORING\n        vec3 vColor = vec3(1,1,1);\n    #endif\n\n    // texture\n    #ifdef TEXTURE\n\n        // use rotation (rotate texture)\n        #ifdef ROTATION\n            float mid = 0.5;\n            vec2 rotated = vec2(cos(vRotation) * (gl_PointCoord.x - mid) + sin(vRotation) * (gl_PointCoord.y - mid) + mid,\n                          cos(vRotation) * (gl_PointCoord.y - mid) - sin(vRotation) * (gl_PointCoord.x - mid) + mid);\n            vec4 texture = texture2D(texture,  rotated);\n        // no rotation\n        #else\n            vec2 coords = vec2((gl_PointCoord.x - 0.5) + 0.5, (gl_PointCoord.y - 0.5) + 0.5);\n            vec4 texture = texture2D(texture, coords);\n        #endif\n\n        // get color with texture\n        gl_FragColor = vec4( globalColor * vColor, vAlpha ) * texture;\n        \n    // no texture (colors only)\n    #else\n        gl_FragColor = vec4( globalColor * vColor, vAlpha );\n    #endif\n\n    // check if need to discard pixel\n    #ifdef ALPHA_TEST\n        if (gl_FragColor.a < 0.00001) { discard; }\n    #endif\n}\n";
+
 /**
  * Material for particles.
  */
@@ -504,7 +525,9 @@ function () {
   }]);
 
   return ParticlesMaterial;
-}();var defined = function defined(val) {
+}();
+
+var defined = function defined(val) {
   return val !== undefined && val !== null;
 };
 /**
@@ -776,6 +799,7 @@ function () {
       this._colorsDirty = Boolean(colors);
       this._alphaDirty = Boolean(alphas);
       this._rotateDirty = Boolean(rotations);
+      console.log('done creating');
     }
   }, {
     key: "start",
@@ -784,6 +808,7 @@ function () {
       var container = this.options.container;
 
       if (container) {
+        console.log('adding to container');
         this.addTo(container);
         this.hasStarted = true;
       } else {
@@ -925,6 +950,7 @@ function () {
      */
     value: function removeAndDisposeIfFinished() {
       if (this.finished) {
+        console.log('system finished, removing');
         this.removeSelf();
         this.dispose();
         return true;
@@ -1110,7 +1136,9 @@ function () {
   }]);
 
   return ParticlesSystem;
-}();/**
+}();
+
+/**
  * Emitter class to determine rate of particles generation.
  */
 
@@ -1175,7 +1203,9 @@ function () {
   }]);
 
   return Emitter;
-}();/**
+}();
+
+/**
  * Define interface for a helper class to generate random vectors and colors.
  * Author: Ronen Ness.
  * Since: 2019.
@@ -1204,7 +1234,9 @@ function () {
   }]);
 
   return Randomizer;
-}();/**
+}();
+
+/**
  * Box vector randomizer.
  */
 
@@ -1239,7 +1271,9 @@ function (_Randomizer) {
   }]);
 
   return BoxRandomizer;
-}(Randomizer);function randMinusToOne() {
+}(Randomizer);
+
+function randMinusToOne() {
   return Math.random() * 2 - 1;
 }
 /**
@@ -1295,7 +1329,9 @@ function (_Randomizer) {
   }]);
 
   return SphereRandomizer;
-}(Randomizer);/**
+}(Randomizer);
+
+/**
  * Box vector randomizer.
  */
 
@@ -1330,7 +1366,9 @@ function (_Randomizer) {
   }]);
 
   return ColorsRandomizer;
-}(Randomizer);/**
+}(Randomizer);
+
+/**
  * Min-Max number randomizer.
  */
 
@@ -1365,8 +1403,21 @@ function (_Randomizer) {
   }]);
 
   return MinMaxRandomizer;
-}(Randomizer);/**
+}(Randomizer);
+
+/**
  * Module main entry point.
  * Author: Ronen Ness.
  * Since: 2019.
- */var index=/*#__PURE__*/Object.freeze({__proto__:null,Randomizer: Randomizer,BoxRandomizer: BoxRandomizer,SphereRandomizer: SphereRandomizer,ColorsRandomizer: ColorsRandomizer,MinMaxRandomizer: MinMaxRandomizer});export{Emitter,Particle,ParticlesSystem,index as Randomizers,utils as Utils};
+ */
+
+var index = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  Randomizer: Randomizer,
+  BoxRandomizer: BoxRandomizer,
+  SphereRandomizer: SphereRandomizer,
+  ColorsRandomizer: ColorsRandomizer,
+  MinMaxRandomizer: MinMaxRandomizer
+});
+
+export { Emitter, Particle, ParticlesSystem, index as Randomizers, utils as Utils };

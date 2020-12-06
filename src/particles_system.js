@@ -250,12 +250,15 @@ export default class ParticlesSystem {
         this._colorsDirty = Boolean(colors);
         this._alphaDirty = Boolean(alphas);
         this._rotateDirty = Boolean(rotations);
+        
+        console.log('done creating');
     }
 
     start() {
         // add it to the parent container
         const { container } = this.options;
         if (container) {
+            console.log('adding to container');
             this.addTo(container);
             this.hasStarted = true;
         } else {
@@ -409,6 +412,7 @@ export default class ParticlesSystem {
     {
         if (this.finished)
         {
+            console.log('system finished, removing');
             this.removeSelf();
             this.dispose();
             return true;
