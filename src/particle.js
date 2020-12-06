@@ -44,7 +44,7 @@ export default class Particle {
         this.acceleration = getConstOrRandomVector(options.acceleration, true);
 
         // starting offset
-        this.position = getConstOrRandomVector(options.offset);
+        this.position = getConstOrRandomVector(options.offset || new Vector3());
 
         // set particle's ttl
         this.ttl = Utils.getRandomWithSpread(options.ttl || 1, options.ttlExtra) || 1;
@@ -243,8 +243,11 @@ export default class Particle {
  */
 function getConstOrRandomVector(constValOrRandomizer, returnNullIfUndefined)
 {
-    if (!constValOrRandomizer) return (returnNullIfUndefined) ? null : new Vector3();
-    if (constValOrRandomizer.generate) return constValOrRandomizer.generate();
+    if (!constValOrRandomizer) {
+        return (returnNullIfUndefined) ? null : new Vector3();
+    } else if (constValOrRandomizer.generate) {
+        return constValOrRandomizer.generate();
+    }
     return constValOrRandomizer.clone();
 }
 
@@ -254,7 +257,10 @@ function getConstOrRandomVector(constValOrRandomizer, returnNullIfUndefined)
  */
 function getConstOrRandomColor(constValOrRandomizer, returnNullIfUndefined)
 {
-    if (!constValOrRandomizer) return (returnNullIfUndefined) ? null : new Color(1, 1, 1);
-    if (constValOrRandomizer.generate) return constValOrRandomizer.generate();
+    if (!constValOrRandomizer) {
+        return (returnNullIfUndefined) ? null : new Color(1, 1, 1);
+    } else if (constValOrRandomizer.generate) {
+        return constValOrRandomizer.generate();
+    }
     return constValOrRandomizer.clone();
 }

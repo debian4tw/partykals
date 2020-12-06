@@ -149,7 +149,7 @@ export default class ParticlesSystem {
             "blend": NormalBlending,
         }[this.blending];
 
-        // starting if options.autostart = true;
+        this.create();
         if (options.autostart) {
             this.start();
         }
@@ -158,7 +158,7 @@ export default class ParticlesSystem {
     /*
     * starting the system
     */
-    start() {
+    create() {
         // set emitters
         this._emitters = [];
         const { system, particles, container } = this.options;
@@ -250,13 +250,17 @@ export default class ParticlesSystem {
         this._colorsDirty = Boolean(colors);
         this._alphaDirty = Boolean(alphas);
         this._rotateDirty = Boolean(rotations);
+    }
 
+    start() {
         // add it to the parent container
+        const { container } = this.options;
         if (container) {
             this.addTo(container);
+            this.hasStarted = true;
+        } else {
+            console.log('no container for particle system, aborting.');
         }
-
-        this.hasStarted = true;
     }
 
     /*
