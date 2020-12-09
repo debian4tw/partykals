@@ -258,8 +258,11 @@ export default class ParticlesSystem {
         if (container) {
             this.addTo(container);
             this.hasStarted = true;
+        } else {
+            console.log('no container for particle system, aborting.');
         }
     }
+
     /*
     * Sets ttl to zero
     */
@@ -513,6 +516,11 @@ export default class ParticlesSystem {
                 this._timeToUpdateBS = 0.2;
                 this.particlesGeometry.computeBoundingSphere();
             }
+        }
+
+        // if finished, stop here
+        if (this.finished) {
+            return;
         }
 
         // call optional update
