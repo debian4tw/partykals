@@ -799,7 +799,6 @@ function () {
       this._colorsDirty = Boolean(colors);
       this._alphaDirty = Boolean(alphas);
       this._rotateDirty = Boolean(rotations);
-      console.log('done creating');
     }
   }, {
     key: "start",
@@ -808,11 +807,8 @@ function () {
       var container = this.options.container;
 
       if (container) {
-        console.log('adding to container');
         this.addTo(container);
         this.hasStarted = true;
-      } else {
-        console.log('no container for particle system, aborting.');
       }
     }
     /*
@@ -950,7 +946,6 @@ function () {
      */
     value: function removeAndDisposeIfFinished() {
       if (this.finished) {
-        console.log('system finished, removing');
         this.removeSelf();
         this.dispose();
         return true;
