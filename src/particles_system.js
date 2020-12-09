@@ -522,12 +522,6 @@ export default class ParticlesSystem {
             }
         }
 
-        // if finished, stop here
-        if (this.finished) {
-            this.removeAndDisposeIfFinished()
-            return;
-        }
-
         // call optional update
         if (this.options.system.onUpdate) {
             this.options.system.onUpdate(this);

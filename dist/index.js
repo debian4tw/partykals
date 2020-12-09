@@ -1058,12 +1058,6 @@ function () {
           this._timeToUpdateBS = 0.2;
           this.particlesGeometry.computeBoundingSphere();
         }
-      } // if finished, stop here
-
-
-      if (this.finished) {
-        this.removeAndDisposeIfFinished();
-        return;
       } // call optional update
 
 
