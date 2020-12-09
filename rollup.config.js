@@ -13,7 +13,7 @@ export default {
     output: {
         file: './dist/index.js',
         format: 'esm',
-        compact: true,
+        compact: false,
         name: 'P'
     },
     plugins: [
